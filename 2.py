@@ -191,12 +191,12 @@ if generate:
 
     st.success("PDF generated – view inline below (no download needed)")
 
-    # Inline PDF viewer
+    # Inline PDF viewer using base64
     b64 = base64.b64encode(pdf_buffer.getvalue()).decode('utf-8')
     pdf_display = f'<iframe src="data:application/pdf;base64,{b64}" width="100%" height="800px" type="application/pdf"></iframe>'
     st.markdown(pdf_display, unsafe_allow_html=True)
 
-    # Optional download
+    # Optional download button
     st.download_button(
         label="Download PDF (optional)",
         data=pdf_buffer,
