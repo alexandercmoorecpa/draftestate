@@ -3,8 +3,9 @@ from datetime import date
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle   # ← Added ParagraphStyle here
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
+import base64
 
 def generate_checklist_pdf(data, today_str):
     buffer = BytesIO()
@@ -25,33 +26,32 @@ def generate_checklist_pdf(data, today_str):
         fontSize=16,
         leading=20,
         spaceAfter=12,
-        alignment=1
+        alignment=1  # center
     )
 
     phase_style = ParagraphStyle(
         name='ChecklistPhase',
         parent=styles['Heading2'],
-        fontSize=11,  # Smaller for page 2+
-        leading=13,
-        spaceBefore=24,
-        spaceAfter=8,
+        fontSize=12,
+        leading=14,
+        spaceBefore=18,
+        spaceAfter=6,
         fontName='Helvetica-Bold'
     )
 
     item_style = ParagraphStyle(
         name='ChecklistItem',
         parent=styles['Normal'],
-        fontSize=10,
-        leading=12,
-        spaceAfter=4,
-        splitLongWords=1  # Force break very long words
+        fontSize=11,
+        leading=13,
+        spaceAfter=4
     )
 
     date_style = ParagraphStyle(
         name='ChecklistDate',
         parent=styles['Normal'],
-        fontSize=9,
-        leading=11,
+        fontSize=10,
+        leading=12,
         spaceAfter=2,
         fontName='Helvetica-Oblique'
     )
@@ -59,10 +59,9 @@ def generate_checklist_pdf(data, today_str):
     notes_style = ParagraphStyle(
         name='ChecklistNotes',
         parent=styles['Normal'],
-        fontSize=9,
-        leading=11,
-        spaceAfter=6,
-        splitLongWords=1
+        fontSize=10,
+        leading=12,
+        spaceAfter=8
     )
 
     reminder_style = ParagraphStyle(
@@ -125,7 +124,7 @@ def generate_checklist_pdf(data, today_str):
 st.set_page_config(page_title="Estate Checklist - ReportLab", layout="wide")
 
 st.title("Estate Administration Checklist")
-st.markdown("Intake form : Do not place sensitive personal information on intake form. Upload through secure portal provided by Tax Advisor once required")
+st.markdown("Flush-left layout, separate lines, everything starts from the left margin. View PDF inline below.")
 
 today_str = date.today().strftime("%B %d, %Y")
 
@@ -183,19 +182,24 @@ with st.form("checklist"):
     st.text_input("14b. Final Form 56 - Estate - Date", key="p5_14b")
     st.text_input("Notes", key="p5_14b_notes")
 
-    generate = st.form_submit_button("Create PDF", type="primary")
+    generate = st.form_submit_button("Generate & View PDF", type="primary")
 
 if generate:
     data = {k: v for k, v in st.session_state.items() if v and not k.startswith("FormSubmit")}
 
     pdf_buffer = generate_checklist_pdf(data, today_str)
 
-    st.success("PDF generated using ReportLab – flush left, separate lines")
+    st.success("PDF generated – view inline below (no download needed)")
+
+    # Inline PDF viewer
+    b64 = base64.b64encode(pdf_buffer.getvalue()).decode('utf-8')
+    pdf_display = f'<iframe src="data:application/pdf;base64,{b64}" width="100%" height="800px" type="application/pdf"></iframe>'
+    st.markdown(pdf_display, unsafe_allow_html=True)
+
+    # Optional download
     st.download_button(
-        label="Download Checklist PDF",
+        label="Download PDF (optional)",
         data=pdf_buffer,
         file_name=f"estate_checklist_{today_str.replace(' ', '_')}.pdf",
         mime="application/pdf"
     )
-
-    st.info("All lines start flush left. No indentation. No cutoff expected.")
