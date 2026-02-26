@@ -125,7 +125,7 @@ def generate_checklist_pdf(data, today_str):
 st.set_page_config(page_title="Estate Checklist - ReportLab", layout="wide")
 
 st.title("Estate Administration Checklist")
-st.markdown("Flush-left layout, separate lines, everything starts from the left margin.")
+st.markdown("Intake form : Do not place sensitive personal information on intake form. Upload through secure portal provided by Tax Advisor once required")
 
 today_str = date.today().strftime("%B %d, %Y")
 
